@@ -44,7 +44,7 @@ payload = {
 }
 
 # Send POST request
-url = "http://localhost:8000/github/multi-quality-check"  # Change to your server URL
+url = "http://localhost:8000/code-analyser/code-quality-check"  # Change to your server URL
 headers = {"Content-Type": "application/json"}
 response = requests.post(url, data=json.dumps(payload), headers=headers)
 
