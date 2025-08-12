@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 import uvicorn
+from app.config.gemini_context_config import gemini_model
 from app.utils.logger import AppLogger
-
 from app.routes.github_code import git_router
 
 logger = AppLogger.get_logger()
@@ -10,11 +10,14 @@ logger = AppLogger.get_logger()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("--->> Application startup")
+    logger.info(f"Response from Gemini --> {gemini_model.generate_response("Hello").text}")
     yield
     logger.info("--->> Application shutdown")
 
 app = FastAPI(title="Code Analyser ", version="1.0.0", lifespan=lifespan)
+
 app.include_router(git_router)
+
 @app.get("/")
 async def root():
     return {"message": "Welcome to Code Quality Analyser"}

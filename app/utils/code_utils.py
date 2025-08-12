@@ -1,27 +1,13 @@
 from app.utils.logger import AppLogger
-from dotenv import load_dotenv
 import re
+from app.config.gemini_context_config import gemini_model as model
 from fastapi.responses import JSONResponse
-import google.generativeai as genai
-import os
 from google.api_core import exceptions as google_exceptions
 from app.utils.github_utils import fetch_github_code
 from app.templates.prompts import LANGUAGE_DETECTION_PROMPT, REVIEW_PROMPT
 import json
 
 logger = AppLogger.get_logger()
-
-# Load environment variables
-load_dotenv()
-api_key = os.getenv("GEMINI_API_KEY")
-if not api_key:
-    logger.error("GEMINI_API_KEY not found in environment variables.")
-    raise RuntimeError("GEMINI_API_KEY not found in environment variables.")
-# Configure Gemini API
-genai.configure(api_key=api_key)
-
-
-gemini_model = genai.GenerativeModel("gemini-1.5-flash")
 
 def json_error(error_message: str):
     return JSONResponse(
@@ -59,7 +45,7 @@ def get_or_extract_code(request):
 def detect_language_with_gemini(code: str) -> str:
     try:
         prompt = LANGUAGE_DETECTION_PROMPT.format(code=code)
-        response = gemini_model.generate_content(prompt)
+        response = model.generate_response(prompt)
         logger.info(f"Detected language: {response}")
         return response.text.strip()
     except Exception as e:
@@ -72,7 +58,7 @@ def review_code_with_gemini(code: str, language: str) -> dict:
 
         prompt = REVIEW_PROMPT.format(language=language, code=code)
 
-        response = gemini_model.generate_content(prompt)
+        response = model.generate_response(prompt)
         logger.info(f"Code Analysis generated")
         text_output = extract_json_from_model_output(response.text)
 
